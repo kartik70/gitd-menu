@@ -323,6 +323,65 @@
             display: block;
         }
 
+        .upi-id-display {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 10px;
+            color: #b8b8ff;
+            font-size: 0.9rem;
+        }
+
+        .upi-id-label {
+            color: #00d9ff;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        .upi-id-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: space-between;
+        }
+
+        .upi-id-value {
+            word-break: break-all;
+            flex: 1;
+            color: #e0e0e0;
+            font-weight: 500;
+        }
+
+        .copy-btn {
+            padding: 8px 16px;
+            background: linear-gradient(45deg, #00d9ff, #8b00ff);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+        }
+
+        .copy-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        .copy-btn.copied {
+            background: linear-gradient(45deg, #00ff88, #00d9ff);
+        }
+
+
         .qr-placeholder {
             width: 250px;
             height: 250px;
@@ -516,6 +575,15 @@
             <div id="qrPlaceholder" class="qr-placeholder">
                 Replace with your UPI QR code image URL in the JavaScript section
             </div>
+            <div id="upiIdDisplay" class="upi-id-display hidden">
+                <div class="upi-id-label">UPI ID (Optional):</div>
+                <div class="upi-id-wrapper">
+                    <div id="upiIdValue" class="upi-id-value"></div>
+                    <button id="copyUpiBtn" class="copy-btn" onclick="copyUpiId()">
+                        <span id="copyBtnText">Copy</span>
+                    </button>
+                </div>
+            </div>
         </div>
 
         <button class="checkout-btn" onclick="proceedToConfirmation()">I've Paid - Continue</button>
@@ -565,12 +633,14 @@
         
         // Replace with your Google Sheets JSON URL from opensheet.elk.sh
         const SHEET_URL = 'https://opensheet.elk.sh/1uYK5t-yrrVURh4tmYM1y6J5v-MTjlmxCPKXPibD3A-Y/EventMenu';
+        const SHEET_URL_1= 'https://opensheet.elk.sh/1uYK5t-yrrVURh4tmYM1y6J5v-MTjlmxCPKXPibD3A-Y/number';
         
-        // Replace with your actual UPI QR code image URL
+        // UPI QR code URL (static, not fetched)
         const QR_CODE_URL = 'upiqr.jpeg';
         
-        // Replace with your WhatsApp number (include country code, no + or spaces)
-        const WHATSAPP_NUMBER = '918237271921';
+        // Default values (will be updated from sheet if available)
+        let WHATSAPP_NUMBER = '918237271921';
+        let UPI_ID = '';
 
         // ========================================
         // STATE MANAGEMENT
@@ -586,9 +656,121 @@
         
         function init() {
             loadQRCode();
+            fetchContactInfo();
             fetchMenu();
             setInterval(fetchMenu, 60000); // Refresh menu every 60 seconds
+            setInterval(fetchContactInfo, 60000); // Refresh contact info every 60 seconds
             renderCart();
+        }
+
+        // Fetch WhatsApp number and UPI ID from sheet
+        async function fetchContactInfo() {
+            try {
+                const response = await fetch(SHEET_URL_1);
+                if (!response.ok) throw new Error('Failed to fetch contact info');
+                
+                const data = await response.json();
+                
+                // Process the data - assuming first row contains the info
+                if (data && data.length > 0) {
+                    const contactData = data[0];
+                    
+                    // Try to find WhatsApp number (check common column names)
+                    const whatsappKey = Object.keys(contactData).find(key => 
+                        key.toLowerCase().includes('whatsapp') || 
+                        key.toLowerCase().includes('phone') ||
+                        key.toLowerCase().includes('number')
+                    );
+                    
+                    // Try to find UPI ID (check common column names)
+                    const upiKey = Object.keys(contactData).find(key => 
+                        key.toLowerCase().includes('upi') && 
+                        !key.toLowerCase().includes('qr') &&
+                        !key.toLowerCase().includes('qrcode')
+                    );
+                    
+                    if (whatsappKey && contactData[whatsappKey]) {
+                        // Clean the WhatsApp number (remove +, spaces, etc.)
+                        WHATSAPP_NUMBER = contactData[whatsappKey].toString().replace(/[\s\+\-\(\)]/g, '');
+                    }
+                    
+                    if (upiKey && contactData[upiKey]) {
+                        UPI_ID = contactData[upiKey].toString().trim();
+                        updateUpiIdDisplay();
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching contact info:', error);
+                // Keep default values if fetch fails
+            }
+        }
+
+        // Update UPI ID display
+        function updateUpiIdDisplay() {
+            const upiIdDisplay = document.getElementById('upiIdDisplay');
+            const upiIdValue = document.getElementById('upiIdValue');
+            
+            if (UPI_ID) {
+                upiIdValue.textContent = UPI_ID;
+                upiIdDisplay.classList.remove('hidden');
+            } else {
+                upiIdDisplay.classList.add('hidden');
+            }
+        }
+
+        // Copy UPI ID to clipboard
+        async function copyUpiId() {
+            if (!UPI_ID) return;
+
+            const copyBtn = document.getElementById('copyUpiBtn');
+            const copyBtnText = document.getElementById('copyBtnText');
+            
+            if (!copyBtn || !copyBtnText) return;
+
+            try {
+                // Use the Clipboard API
+                await navigator.clipboard.writeText(UPI_ID);
+                
+                // Show feedback
+                copyBtn.classList.add('copied');
+                copyBtnText.textContent = 'Copied!';
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    copyBtn.classList.remove('copied');
+                    copyBtnText.textContent = 'Copy';
+                }, 2000);
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = UPI_ID;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '0';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                try {
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        copyBtn.classList.add('copied');
+                        copyBtnText.textContent = 'Copied!';
+                        
+                        setTimeout(() => {
+                            copyBtn.classList.remove('copied');
+                            copyBtnText.textContent = 'Copy';
+                        }, 2000);
+                    } else {
+                        throw new Error('Copy command failed');
+                    }
+                } catch (fallbackErr) {
+                    console.error('Copy failed:', fallbackErr);
+                    alert('Failed to copy. Please copy manually: ' + UPI_ID);
+                } finally {
+                    document.body.removeChild(textArea);
+                }
+            }
         }
 
         // Load QR code if URL is provided

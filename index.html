@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glow in the Dark - New Year Bash</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #ffffff;
+            min-height: 100vh;
+            padding-bottom: 120px;
+        }
+
+        /* Header / Hero Section */
+        .hero {
+            text-align: center;
+            padding: 40px 20px 30px;
+            background: linear-gradient(180deg, rgba(139, 0, 139, 0.3), transparent);
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ff006e, #8b00ff, #00d9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 0, 110, 0.5);
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .hero .subtitle {
+            font-size: 1.2rem;
+            color: #ff006e;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 20px rgba(255, 0, 110, 0.6);
+        }
+
+        .hero .tagline {
+            font-size: 0.9rem;
+            color: #b8b8ff;
+            letter-spacing: 2px;
+        }
+
+        /* Loading & Error States */
+        .status-message {
+            text-align: center;
+            padding: 30px 20px;
+            margin: 20px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .loading {
+            color: #00d9ff;
+        }
+
+        .error {
+            color: #ff006e;
+        }
+
+        .retry-btn {
+            margin-top: 15px;
+            padding: 12px 30px;
+            background: linear-gradient(45deg, #ff006e, #8b00ff);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .retry-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 0, 110, 0.8);
+        }
+
+        /* Menu Container */
+        .menu-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .category-section {
+            margin-bottom: 40px;
+        }
+
+        .category-title {
+            font-size: 1.5rem;
+            color: #00d9ff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(0, 217, 255, 0.3);
+            text-shadow: 0 0 15px rgba(0, 217, 255, 0.6);
+        }
+
+        /* Menu Item Card */
+        .menu-item {
+            background: rgba(20, 20, 40, 0.8);
+            border: 1px solid rgba(139, 0, 255, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(139, 0, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .menu-item:hover {
+            border-color: rgba(255, 0, 110, 0.6);
+            box-shadow: 0 6px 25px rgba(255, 0, 110, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .item-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .item-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #00d9ff;
+            text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+        }
+
+        .item-controls {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .qty-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #8b00ff;
+            background: rgba(139, 0, 255, 0.2);
+            color: #ffffff;
+            font-size: 1.3rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qty-btn:hover {
+            background: rgba(255, 0, 110, 0.4);
+            border-color: #ff006e;
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.6);
+            transform: scale(1.1);
+        }
+
+        .qty-btn:active {
+            transform: scale(0.95);
+        }
+
+        .qty-display {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #00d9ff;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        /* Sticky Cart Section */
+        .cart-sticky {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, rgba(15, 12, 41, 0.95), rgba(36, 36, 62, 0.98));
+            border-top: 2px solid rgba(255, 0, 110, 0.5);
+            box-shadow: 0 -4px 30px rgba(139, 0, 255, 0.4);
+            padding: 15px 20px;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .cart-summary {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .cart-empty {
+            text-align: center;
+            color: #b8b8ff;
+            font-size: 0.9rem;
+        }
+
+        .cart-items {
+            max-height: 100px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding-right: 5px;
+        }
+
+        .cart-items::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .cart-items::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .cart-items::-webkit-scrollbar-thumb {
+            background: rgba(255, 0, 110, 0.5);
+            border-radius: 3px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: #e0e0e0;
+        }
+
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #00d9ff;
+            text-shadow: 0 0 15px rgba(0, 217, 255, 0.6);
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 15px;
+            margin-top: 10px;
+            background: linear-gradient(45deg, #ff006e, #8b00ff);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 25px rgba(255, 0, 110, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .checkout-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 35px rgba(255, 0, 110, 0.8);
+        }
+
+        .checkout-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Payment Section */
+        .payment-section {
+            max-width: 500px;
+            margin: 30px auto;
+            padding: 30px 20px;
+            background: rgba(20, 20, 40, 0.9);
+            border: 2px solid rgba(139, 0, 255, 0.5);
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(139, 0, 255, 0.3);
+            text-align: center;
+        }
+
+        .payment-section h2 {
+            font-size: 1.8rem;
+            color: #00d9ff;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(0, 217, 255, 0.6);
+        }
+
+        .payment-instruction {
+            color: #b8b8ff;
+            margin-bottom: 25px;
+            font-size: 1rem;
+        }
+
+        .qr-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            display: inline-block;
+            margin-bottom: 20px;
+            box-shadow: 0 0 30px rgba(255, 0, 110, 0.3);
+        }
+
+        .qr-container img {
+            max-width: 250px;
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .qr-placeholder {
+            width: 250px;
+            height: 250px;
+            background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 0.9rem;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .back-btn {
+            padding: 12px 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #00d9ff;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
+        }
+
+        /* Confirmation Section */
+        .confirmation-section {
+            max-width: 500px;
+            margin: 30px auto;
+            padding: 30px 20px;
+            background: rgba(20, 20, 40, 0.9);
+            border: 2px solid rgba(255, 0, 110, 0.5);
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(255, 0, 110, 0.3);
+        }
+
+        .confirmation-section h2 {
+            font-size: 1.8rem;
+            color: #ff006e;
+            margin-bottom: 25px;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(255, 0, 110, 0.6);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #00d9ff;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(139, 0, 255, 0.4);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #00d9ff;
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .order-summary {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .order-summary h3 {
+            color: #00d9ff;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #e0e0e0;
+        }
+
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #00d9ff;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .confirm-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #00d9ff, #8b00ff);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 25px rgba(0, 217, 255, 0.6);
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .confirm-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 35px rgba(0, 217, 255, 0.8);
+        }
+
+        .confirm-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Hidden class */
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero .subtitle {
+                font-size: 1rem;
+            }
+
+            .item-name {
+                font-size: 1rem;
+            }
+
+            .item-price {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>Glow in the Dark</h1>
+        <div class="subtitle">New Year Bash</div>
+        <div class="tagline">Couples Only • Scan • Order • Pay • Enjoy</div>
+    </div>
+
+    <!-- Menu Section -->
+    <div id="menuSection" class="menu-container">
+        <div id="menuContent"></div>
+    </div>
+
+    <!-- Payment Section (Hidden by default) -->
+    <div id="paymentSection" class="payment-section hidden">
+        <h2>Pay via UPI</h2>
+        <p class="payment-instruction">Scan using any UPI app (GPay / PhonePe / Paytm)</p>
+        
+        <div class="qr-container">
+            <!-- Replace this with your actual UPI QR code image -->
+            <img id="qrImage" src="" alt="UPI QR Code" class="hidden">
+            <div id="qrPlaceholder" class="qr-placeholder">
+                Replace with your UPI QR code image URL in the JavaScript section
+            </div>
+        </div>
+
+        <button class="checkout-btn" onclick="proceedToConfirmation()">I've Paid - Continue</button>
+        <button class="back-btn" onclick="backToMenu()">Back to Menu</button>
+    </div>
+
+    <!-- Confirmation Section (Hidden by default) -->
+    <div id="confirmationSection" class="confirmation-section hidden">
+        <h2>Order Confirmation</h2>
+        
+        <div class="order-summary">
+            <h3>Your Order</h3>
+            <div id="confirmOrderItems"></div>
+            <div class="order-total">
+                <span>Total</span>
+                <span id="confirmTotal">₹0</span>
+            </div>
+        </div>
+
+        <form id="confirmationForm" onsubmit="sendToWhatsApp(event)">
+            <div class="form-group">
+                <label for="customerName">Your Name *</label>
+                <input type="text" id="customerName" placeholder="Enter your name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="transactionId">UPI Transaction ID *</label>
+                <input type="text" id="transactionId" placeholder="e.g., 123456789012" required>
+            </div>
+
+            <button type="submit" class="confirm-btn">Confirm Order via WhatsApp</button>
+            <button type="button" class="back-btn" onclick="backToPayment()">Back</button>
+        </form>
+    </div>
+
+    <!-- Sticky Cart -->
+    <div class="cart-sticky">
+        <div class="cart-summary">
+            <div id="cartContent" class="cart-empty">Your cart is empty</div>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // CONFIGURATION - Update these values
+        // ========================================
+        
+        // Replace with your Google Sheets JSON URL from opensheet.elk.sh
+        const SHEET_URL = 'https://opensheet.elk.sh/YOUR_SHEET_ID/YOUR_TAB_NAME';
+        
+        // Replace with your actual UPI QR code image URL
+        const QR_CODE_URL = '';
+        
+        // Replace with your WhatsApp number (include country code, no + or spaces)
+        const WHATSAPP_NUMBER = '917709243018';
+
+        // ========================================
+        // STATE MANAGEMENT
+        // ========================================
+        
+        let menuData = [];
+        let cart = JSON.parse(localStorage.getItem('glowEventCart')) || {};
+        let currentView = 'menu'; // 'menu', 'payment', 'confirmation'
+
+        // ========================================
+        // INITIALIZATION
+        // ========================================
+        
+        function init() {
+            loadQRCode();
+            fetchMenu();
+            setInterval(fetchMenu, 60000); // Refresh menu every 60 seconds
+            renderCart();
+        }
+
+        // Load QR code if URL is provided
+        function loadQRCode() {
+            if (QR_CODE_URL) {
+                document.getElementById('qrImage').src = QR_CODE_URL;
+                document.getElementById('qrImage').classList.remove('hidden');
+                document.getElementById('qrPlaceholder').classList.add('hidden');
+            }
+        }
+
+        // ========================================
+        // MENU FETCHING & RENDERING
+        // ========================================
+        
+        async function fetchMenu() {
+            const menuContent = document.getElementById('menuContent');
+            
+            // Show loading state
+            menuContent.innerHTML = '<div class="status-message loading">Loading menu...</div>';
+
+            try {
+                const response = await fetch(SHEET_URL);
+                if (!response.ok) throw new Error('Failed to fetch menu');
+                
+                const data = await response.json();
+                
+                // Filter available items and process
+                menuData = data.filter(item => 
+                    item.available && 
+                    item.available.toString().toUpperCase() === 'TRUE' &&
+                    item.name &&
+                    item.category &&
+                    item.price
+                );
+
+                if (menuData.length === 0) {
+                    menuContent.innerHTML = '<div class="status-message">No items available at the moment</div>';
+                    return;
+                }
+
+                renderMenu();
+            } catch (error) {
+                console.error('Error fetching menu:', error);
+                menuContent.innerHTML = `
+                    <div class="status-message error">
+                        Failed to load menu. Please check your internet connection.
+                        <br><button class="retry-btn" onclick="fetchMenu()">Retry</button>
+                    </div>
+                `;
+            }
+        }
+
+        function renderMenu() {
+            const menuContent = document.getElementById('menuContent');
+            
+            // Group items by category
+            const categories = {};
+            menuData.forEach(item => {
+                const category = item.category.trim();
+                if (!categories[category]) {
+                    categories[category] = [];
+                }
+                categories[category].push(item);
+            });
+
+            // Render each category
+            let html = '';
+            Object.keys(categories).forEach(category => {
+                html += `
+                    <div class="category-section">
+                        <h2 class="category-title">${category}</h2>
+                        ${categories[category].map(item => renderMenuItem(item)).join('')}
+                    </div>
+                `;
+            });
+
+            menuContent.innerHTML = html;
+        }
+
+        function renderMenuItem(item) {
+            const itemId = sanitizeId(item.name);
+            const quantity = cart[itemId] ? cart[itemId].quantity : 0;
+
+            return `
+                <div class="menu-item">
+                    <div class="item-header">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-price">₹${parseFloat(item.price).toFixed(0)}</div>
+                    </div>
+                    <div class="item-controls">
+                        <button class="qty-btn" onclick="updateQuantity('${itemId}', ${quantity - 1})">−</button>
+                        <div class="qty-display">${quantity}</div>
+                        <button class="qty-btn" onclick="updateQuantity('${itemId}', ${quantity + 1})">+</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ========================================
+        // CART MANAGEMENT
+        // ========================================
+        
+        function sanitizeId(name) {
+            return name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        }
+
+        function updateQuantity(itemId, newQuantity) {
+            const item = menuData.find(i => sanitizeId(i.name) === itemId);
+            if (!item) return;
+
+            if (newQuantity <= 0) {
+                delete cart[itemId];
+            } else {
+                cart[itemId] = {
+                    name: item.name,
+                    price: parseFloat(item.price),
+                    quantity: newQuantity
+                };
+            }
+
+            // Save to localStorage
+            localStorage.setItem('glowEventCart', JSON.stringify(cart));
+            
+            // Re-render
+            renderMenu();
+            renderCart();
+        }
+
+        function renderCart() {
+            const cartContent = document.getElementById('cartContent');
+            const cartItems = Object.values(cart);
+
+            if (cartItems.length === 0) {
+                cartContent.innerHTML = '<div class="cart-empty">Your cart is empty</div>';
+                return;
+            }
+
+            const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            cartContent.innerHTML = `
+                <div class="cart-items">
+                    ${cartItems.map(item => `
+                        <div class="cart-item">
+                            <span>${item.name} × ${item.quantity}</span>
+                            <span>₹${(item.price * item.quantity).toFixed(0)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="cart-total">
+                    <span>Total</span>
+                    <span>₹${total.toFixed(0)}</span>
+                </div>
+                <button class="checkout-btn" onclick="proceedToPayment()">Proceed to Pay</button>
+            `;
+        }
+
+        function calculateTotal() {
+            return Object.values(cart).reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        }
+
+        // ========================================
+        // NAVIGATION & VIEW SWITCHING
+        // ========================================
+        
+        function proceedToPayment() {
+            if (Object.keys(cart).length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+
+            currentView = 'payment';
+            document.getElementById('menuSection').classList.add('hidden');
+            document.getElementById('paymentSection').classList.remove('hidden');
+            document.getElementById('confirmationSection').classList.add('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        function backToMenu() {
+            currentView = 'menu';
+            document.getElementById('menuSection').classList.remove('hidden');
+            document.getElementById('paymentSection').classList.add('hidden');
+            document.getElementById('confirmationSection').classList.add('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        function proceedToConfirmation() {
+            currentView = 'confirmation';
+            document.getElementById('menuSection').classList.add('hidden');
+            document.getElementById('paymentSection').classList.add('hidden');
+            document.getElementById('confirmationSection').classList.remove('hidden');
+
+            // Populate order summary
+            const confirmOrderItems = document.getElementById('confirmOrderItems');
+            const confirmTotal = document.getElementById('confirmTotal');
+            const cartItems = Object.values(cart);
+            const total = calculateTotal();
+
+            confirmOrderItems.innerHTML = cartItems.map(item => `
+                <div class="order-item">
+                    <span>${item.name} × ${item.quantity}</span>
+                    <span>₹${(item.price * item.quantity).toFixed(0)}</span>
+                </div>
+            `).join('');
+
+            confirmTotal.textContent = `₹${total.toFixed(0)}`;
+            window.scrollTo(0, 0);
+        }
+
+        function backToPayment() {
+            currentView = 'payment';
+            document.getElementById('menuSection').classList.add('hidden');
+            document.getElementById('paymentSection').classList.remove('hidden');
+            document.getElementById('confirmationSection').classList.add('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        // ========================================
+        // WHATSAPP ORDER CONFIRMATION
+        // ========================================
+        
+        function sendToWhatsApp(event) {
+            event.preventDefault();
+
+            const customerName = document.getElementById('customerName').value.trim();
+            const transactionId = document.getElementById('transactionId').value.trim();
+
+            if (!customerName || !transactionId) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            // Generate order number (timestamp-based)
+            const orderNumber = 'GLW' + Date.now();
+
+            // Build order items text
+            const cartItems = Object.values(cart);
+            const itemsText = cartItems.map(item => 
+                `${item.name} × ${item.quantity} = ₹${(item.price * item.quantity).toFixed(0)}`
+            ).join('\n');
+
+            const total = calculateTotal();
+
+            // Create WhatsApp message
+            const message = `✨ Glow in the Dark – Order Confirmation ✨
+
+Order No: #${orderNumber}
+Name: ${customerName}
+
+Items:
+${itemsText}
+
+Total Amount: ₹${total.toFixed(0)}
+UPI Txn ID: ${transactionId}
+
+Thank you for your order! 🎉`;
+
+            // Open WhatsApp
+            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+
+            // Clear cart and reset
+            cart = {};
+            localStorage.removeItem('glowEventCart');
+            
+            // Show success and redirect
+            alert('Order sent! Please check WhatsApp to complete your order.');
+            
+            setTimeout(() => {
+                backToMenu();
+                renderCart();
+                renderMenu();
+            }, 1000);
+        }
+
+        // ========================================
+        // START APPLICATION
+        // ========================================
+        
+        init();
+    </script>
+</body>
+</html>

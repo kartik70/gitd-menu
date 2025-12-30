@@ -307,6 +307,52 @@
             font-size: 1rem;
         }
 
+        .payment-total {
+            background: rgba(0, 217, 255, 0.1);
+            border: 2px solid rgba(0, 217, 255, 0.4);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .payment-total-label {
+            color: #b8b8ff;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .payment-total-amount {
+            color: #00d9ff;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(0, 217, 255, 0.6);
+        }
+
+        .payment-reminder {
+            background: rgba(255, 0, 110, 0.1);
+            border: 2px solid rgba(255, 0, 110, 0.4);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 20px 0 25px 0;
+            text-align: center;
+        }
+
+        .payment-reminder-text {
+            color: #ff006e;
+            font-size: 0.95rem;
+            font-weight: 600;
+            line-height: 1.6;
+            text-shadow: 0 0 10px rgba(255, 0, 110, 0.3);
+        }
+
+        .payment-reminder-text strong {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
         .qr-container {
             background: white;
             padding: 20px;
@@ -566,8 +612,13 @@
 
     <!-- Payment Section (Hidden by default) -->
     <div id="paymentSection" class="payment-section hidden">
-        <h2>Pay via UPI</h2>
-        <p class="payment-instruction">Scan using any UPI app (GPay / PhonePe / Paytm)</p>
+        <h2>💳 Pay via UPI</h2>
+        <p class="payment-instruction">📱 Scan using any UPI app (GPay / PhonePe / Paytm)</p>
+        
+        <div class="payment-total">
+            <span class="payment-total-label">💰 Total Amount to Pay:</span>
+            <span id="paymentTotalAmount" class="payment-total-amount">₹0</span>
+        </div>
         
         <div class="qr-container">
             <!-- Replace this with your actual UPI QR code image -->
@@ -576,53 +627,60 @@
                 Replace with your UPI QR code image URL in the JavaScript section
             </div>
             <div id="upiIdDisplay" class="upi-id-display hidden">
-                <div class="upi-id-label">UPI ID (Optional):</div>
+                <div class="upi-id-label">💳 UPI ID (Optional):</div>
                 <div class="upi-id-wrapper">
                     <div id="upiIdValue" class="upi-id-value"></div>
                     <button id="copyUpiBtn" class="copy-btn" onclick="copyUpiId()">
-                        <span id="copyBtnText">Copy</span>
+                        <span id="copyBtnText">📋 Copy</span>
                     </button>
                 </div>
             </div>
         </div>
 
-        <button class="checkout-btn" onclick="proceedToConfirmation()">I've Paid - Continue</button>
-        <button class="back-btn" onclick="backToMenu()">Back to Menu</button>
+        <div class="payment-reminder">
+            <p class="payment-reminder-text">
+                💳 Make the payment using the QR code above<br>
+                ⚠️ <strong>Don't forget to copy your UPI Transaction ID</strong> for the next step
+            </p>
+        </div>
+
+        <button class="checkout-btn" onclick="proceedToConfirmation()">✅ I've Paid - Continue</button>
+        <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
     </div>
 
     <!-- Confirmation Section (Hidden by default) -->
     <div id="confirmationSection" class="confirmation-section hidden">
-        <h2>Order Confirmation</h2>
+        <h2>📋 Order Confirmation</h2>
         
         <div class="order-summary">
-            <h3>Your Order</h3>
+            <h3>🛒 Your Order</h3>
             <div id="confirmOrderItems"></div>
             <div class="order-total">
-                <span>Total</span>
+                <span>💰 Total</span>
                 <span id="confirmTotal">₹0</span>
             </div>
         </div>
 
         <form id="confirmationForm" onsubmit="sendToWhatsApp(event)">
             <div class="form-group">
-                <label for="customerName">Your Name *</label>
+                <label for="customerName">👤 Your Name *</label>
                 <input type="text" id="customerName" placeholder="Enter your name" required>
             </div>
 
             <div class="form-group">
-                <label for="transactionId">UPI Transaction ID *</label>
+                <label for="transactionId">🔢 UPI Transaction ID *</label>
                 <input type="text" id="transactionId" placeholder="e.g., 123456789012" required>
             </div>
 
-            <button type="submit" class="confirm-btn">Confirm Order via WhatsApp</button>
-            <button type="button" class="back-btn" onclick="backToPayment()">Back</button>
+            <button type="submit" class="confirm-btn">📱 Confirm Order via WhatsApp</button>
+            <button type="button" class="back-btn" onclick="backToPayment()">← Back</button>
         </form>
     </div>
 
     <!-- Sticky Cart -->
-    <div class="cart-sticky">
+    <div id="cartSticky" class="cart-sticky">
         <div class="cart-summary">
-            <div id="cartContent" class="cart-empty">Your cart is empty</div>
+            <div id="cartContent" class="cart-empty">🛒 Your cart is empty</div>
         </div>
     </div>
 
@@ -733,12 +791,12 @@
                 
                 // Show feedback
                 copyBtn.classList.add('copied');
-                copyBtnText.textContent = 'Copied!';
+                copyBtnText.textContent = '✅ Copied!';
                 
                 // Reset after 2 seconds
                 setTimeout(() => {
                     copyBtn.classList.remove('copied');
-                    copyBtnText.textContent = 'Copy';
+                    copyBtnText.textContent = '📋 Copy';
                 }, 2000);
             } catch (err) {
                 // Fallback for older browsers
@@ -755,18 +813,18 @@
                     const successful = document.execCommand('copy');
                     if (successful) {
                         copyBtn.classList.add('copied');
-                        copyBtnText.textContent = 'Copied!';
+                        copyBtnText.textContent = '✅ Copied!';
                         
                         setTimeout(() => {
                             copyBtn.classList.remove('copied');
-                            copyBtnText.textContent = 'Copy';
+                            copyBtnText.textContent = '📋 Copy';
                         }, 2000);
                     } else {
                         throw new Error('Copy command failed');
                     }
                 } catch (fallbackErr) {
                     console.error('Copy failed:', fallbackErr);
-                    alert('Failed to copy. Please copy manually: ' + UPI_ID);
+                    alert('❌ Failed to copy. Please copy manually: ' + UPI_ID);
                 } finally {
                     document.body.removeChild(textArea);
                 }
@@ -790,7 +848,7 @@
             const menuContent = document.getElementById('menuContent');
             
             // Show loading state
-            menuContent.innerHTML = '<div class="status-message loading">Loading menu...</div>';
+            menuContent.innerHTML = '<div class="status-message loading">⏳ Loading menu...</div>';
 
             try {
                 const response = await fetch(SHEET_URL);
@@ -808,7 +866,7 @@
                 );
 
                 if (menuData.length === 0) {
-                    menuContent.innerHTML = '<div class="status-message">No items available at the moment</div>';
+                    menuContent.innerHTML = '<div class="status-message">😔 No items available at the moment</div>';
                     return;
                 }
 
@@ -817,8 +875,8 @@
                 console.error('Error fetching menu:', error);
                 menuContent.innerHTML = `
                     <div class="status-message error">
-                        Failed to load menu. Please check your internet connection.
-                        <br><button class="retry-btn" onclick="fetchMenu()">Retry</button>
+                        ❌ Failed to load menu. Please check your internet connection.
+                        <br><button class="retry-btn" onclick="fetchMenu()">🔄 Retry</button>
                     </div>
                 `;
             }
@@ -905,7 +963,7 @@
             const cartItems = Object.values(cart);
 
             if (cartItems.length === 0) {
-                cartContent.innerHTML = '<div class="cart-empty">Your cart is empty</div>';
+                cartContent.innerHTML = '<div class="cart-empty">🛒 Your cart is empty</div>';
                 return;
             }
 
@@ -921,10 +979,10 @@
                     `).join('')}
                 </div>
                 <div class="cart-total">
-                    <span>Total</span>
+                    <span>💰 Total</span>
                     <span>₹${total.toFixed(0)}</span>
                 </div>
-                <button class="checkout-btn" onclick="proceedToPayment()">Proceed to Pay</button>
+                <button class="checkout-btn" onclick="proceedToPayment()">💳 Proceed to Pay</button>
             `;
         }
 
@@ -938,14 +996,19 @@
         
         function proceedToPayment() {
             if (Object.keys(cart).length === 0) {
-                alert('Your cart is empty!');
+                alert('🛒 Your cart is empty!');
                 return;
             }
+
+            // Calculate and display total amount
+            const total = calculateTotal();
+            document.getElementById('paymentTotalAmount').textContent = `₹${total.toFixed(0)}`;
 
             currentView = 'payment';
             document.getElementById('menuSection').classList.add('hidden');
             document.getElementById('paymentSection').classList.remove('hidden');
             document.getElementById('confirmationSection').classList.add('hidden');
+            document.getElementById('cartSticky').classList.add('hidden');
             window.scrollTo(0, 0);
         }
 
@@ -954,6 +1017,7 @@
             document.getElementById('menuSection').classList.remove('hidden');
             document.getElementById('paymentSection').classList.add('hidden');
             document.getElementById('confirmationSection').classList.add('hidden');
+            document.getElementById('cartSticky').classList.remove('hidden');
             window.scrollTo(0, 0);
         }
 
@@ -962,6 +1026,7 @@
             document.getElementById('menuSection').classList.add('hidden');
             document.getElementById('paymentSection').classList.add('hidden');
             document.getElementById('confirmationSection').classList.remove('hidden');
+            document.getElementById('cartSticky').classList.add('hidden');
 
             // Populate order summary
             const confirmOrderItems = document.getElementById('confirmOrderItems');
@@ -971,7 +1036,7 @@
 
             confirmOrderItems.innerHTML = cartItems.map(item => `
                 <div class="order-item">
-                    <span>${item.name} × ${item.quantity}</span>
+                    <span>🍽️ ${item.name} × ${item.quantity}</span>
                     <span>₹${(item.price * item.quantity).toFixed(0)}</span>
                 </div>
             `).join('');
@@ -985,6 +1050,7 @@
             document.getElementById('menuSection').classList.add('hidden');
             document.getElementById('paymentSection').classList.remove('hidden');
             document.getElementById('confirmationSection').classList.add('hidden');
+            document.getElementById('cartSticky').classList.add('hidden');
             window.scrollTo(0, 0);
         }
 
@@ -999,7 +1065,7 @@
             const transactionId = document.getElementById('transactionId').value.trim();
 
             if (!customerName || !transactionId) {
-                alert('Please fill in all required fields');
+                alert('⚠️ Please fill in all required fields');
                 return;
             }
 
@@ -1017,14 +1083,14 @@
             // Create WhatsApp message
             const message = `✨ Glow in the Dark – Order Confirmation ✨
 
-Order No: #${orderNumber}
-Name: ${customerName}
+📋 Order No: #${orderNumber}
+👤 Name: ${customerName}
 
-Items:
+🛒 Items:
 ${itemsText}
 
-Total Amount: ₹${total.toFixed(0)}
-UPI Txn ID: ${transactionId}
+💰 Total Amount: ₹${total.toFixed(0)}
+🔢 UPI Txn ID: ${transactionId}
 
 Thank you for your order! 🎉`;
 
@@ -1037,7 +1103,7 @@ Thank you for your order! 🎉`;
             localStorage.removeItem('glowEventCart');
             
             // Show success and redirect
-            alert('Order sent! Please check WhatsApp to complete your order.');
+            alert('✅ Order sent! Please check WhatsApp to complete your order.');
             
             setTimeout(() => {
                 backToMenu();
